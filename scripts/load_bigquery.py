@@ -1,4 +1,6 @@
-"""Build - and by default only *print* - the one BigQuery load job this repo needs.
+"""LEGACY RAW-ONLY LOADER: use prepare_bigquery.py and deploy_bigquery.py for dashboards.
+
+Build - and by default only *print* - the one BigQuery load job this repo needs.
 
     # default, offline, no credentials required
     PYTHONPATH=src python scripts/load_bigquery.py --dry-run

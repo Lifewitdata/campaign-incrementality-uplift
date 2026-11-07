@@ -25,7 +25,8 @@ Details: [experiment brief](reports/experiment_brief.md), [model card](reports/m
   ROI**.
 - `mens` / `womens` are pre-campaign purchase flags, not gender.
 - **BigQuery SQL (`sql/bigquery/`) is parse-verified with sqlglot but has never been run against
-  a live project.** `scripts/load_bigquery.py` defaults to `--dry-run`.
+  a live project.** Use `scripts/prepare_bigquery.py` and `scripts/deploy_bigquery.py`
+  for the supported, reconciled deployment workflow; it previews offline by default.
 
 ## Run it
 
@@ -75,3 +76,14 @@ reports/ dashboards/ notebooks/ data/README.md
 
 Data: Kevin Hillstrom (2008), MineThatData E-Mail Analytics and Data Mining Challenge. See
 [data/README.md](data/README.md).
+
+
+## BigQuery integration update
+
+The supported warehouse workflow is now `scripts/prepare_bigquery.py` followed by
+`scripts/deploy_bigquery.py`. It preserves original record IDs, validates the score
+contract and seeded ranks, loads the existing statistical evidence, and checks the
+cloud results against Python. See [the BigQuery runbook](sql/bigquery/README.md).
+The deploy command previews offline unless `--execute` is supplied. Live deployment
+is not claimed until a successful local deployment receipt exists. Tableau workbooks
+and publication remain pending.

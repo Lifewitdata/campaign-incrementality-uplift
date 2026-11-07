@@ -3,7 +3,7 @@
 -- Purpose: land the raw Hillstrom landing table into the curated table: trim
 --          labels, fix the zip_code typo while keeping the raw value, derive
 --          arm_code and history_band, and stamp the load time.
--- Inputs:  campaign_incrementality.landing_hillstrom_raw (stage 00).
+-- Inputs:  campaign_incrementality.landing_hillstrom_indexed (stage 00).
 -- Outputs: campaign_incrementality.curated_campaign_customers (stage 02 DDL)
 --          campaign_incrementality.campaign_customers_csv - the 16-column
 --          extract that matches data/processed/campaign_customers.csv exactly.
@@ -13,23 +13,17 @@
 -- NOT EXECUTED: parsed by sqlglot only; never run against a live project.
 -- =============================================================================
 
-INSERT OVERWRITE `campaign_incrementality.curated_campaign_customers` (
+BEGIN TRANSACTION;
+DELETE FROM `campaign_incrementality.curated_campaign_customers` WHERE TRUE;
+INSERT INTO `campaign_incrementality.curated_campaign_customers` (
   record_id, recency, history_segment, history, mens, womens, zip_code, zip_code_raw,
   newbie, channel, segment, visit, conversion, spend, arm_code, history_band,
   campaign_weeks, data_loaded_utc
 )
 WITH staging AS (
   SELECT
-    -- record_id is the row position in the published file. The dataset ships no
-    -- customer identifier, so this is a join/load key, not a customer key.
-    -- BigQuery does not preserve CSV row order across loads, so the ordering
-    -- below is a deterministic surrogate for that position; README option B
-    -- (load the pipeline-published curated CSV) is the only way to reproduce
-    -- the exact record_id values the Python artefacts carry.
-    ROW_NUMBER() OVER (
-      ORDER BY recency, history, history_segment, mens, womens, zip_code, newbie,
-               channel, segment, visit, conversion, spend
-    ) AS record_id,
+    -- Preserve the zero-based file row ID exported by Python.
+    record_id,
     recency,
     TRIM(history_segment) AS history_segment,
     history,
@@ -68,7 +62,7 @@ WITH staging AS (
       ELSE '7) $1,000 +'
     END AS history_band,
     CAST(2 AS INT64) AS campaign_weeks
-  FROM `campaign_incrementality.landing_hillstrom_raw`
+  FROM `campaign_incrementality.landing_hillstrom_indexed`
 )
 SELECT
   staging.record_id, staging.recency, staging.history_segment, staging.history,
@@ -77,6 +71,8 @@ SELECT
   staging.conversion, staging.spend, staging.arm_code, staging.history_band,
   staging.campaign_weeks, CURRENT_TIMESTAMP() AS data_loaded_utc
 FROM staging;
+
+COMMIT TRANSACTION;
 
 -- Published contract: the same 16 columns, in the same order, as
 -- data/processed/campaign_customers.csv. Unload this, not the base table, if a

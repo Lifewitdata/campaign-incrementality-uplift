@@ -11,7 +11,7 @@
 --          is $0.005 per send at 45% gross margin; the grid is the three cost
 --          and three margin scenarios in the config.
 -- NOT EXECUTED: parsed by sqlglot only; never run against a live project.
---          Idempotent: INSERT OVERWRITE replaces the grid.
+--          Idempotent: transactional DELETE/INSERT replaces the grid.
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS `campaign_incrementality.reference_scenarios` (
@@ -26,7 +26,9 @@ OPTIONS(
   description = 'Modelled cost and margin assumptions for scenario analysis. The Hillstrom experiment records no spend on e-mail and no product margin, so these are assumptions, never realised economics.'
 );
 
-INSERT OVERWRITE `campaign_incrementality.reference_scenarios` (
+BEGIN TRANSACTION;
+DELETE FROM `campaign_incrementality.reference_scenarios` WHERE TRUE;
+INSERT INTO `campaign_incrementality.reference_scenarios` (
   scenario_id, scenario_label, email_cost_per_send, gross_margin_rate, is_base_case, assumption_note
 )
 SELECT
@@ -39,3 +41,5 @@ SELECT
   'Modelled assumption: no cost or margin data exists in the Hillstrom file, so this is not realised ROI.'
 FROM UNNEST([0.002, 0.005, 0.010]) AS cost
 CROSS JOIN UNNEST([0.30, 0.45, 0.60]) AS margin;
+
+COMMIT TRANSACTION;

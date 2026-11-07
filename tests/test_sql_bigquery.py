@@ -185,7 +185,7 @@ def test_curated_insert_fixes_the_source_typo_auditable() -> None:
     assert "'Surburban'" in code, "the source typo must be named explicitly"
     assert "'Suburban'" in code, "the corrected label must be written"
     assert "zip_code_raw" in code, "the raw value must be preserved for audit"
-    assert re.search(r"INSERT OVERWRITE\s+`campaign_incrementality\.curated_campaign_customers`", code, re.IGNORECASE)
+    assert re.search(r"INSERT INTO\s+`campaign_incrementality\.curated_campaign_customers`", code, re.IGNORECASE)
     assert re.search(r"CURRENT_TIMESTAMP\(\)\s+AS\s+data_loaded_utc", code, re.IGNORECASE)
     for threshold in ["100.0", "200.0", "350.0", "500.0", "750.0", "1000.0"]:
         assert threshold in code, f"history band edge {threshold} is missing"
@@ -209,15 +209,11 @@ def test_data_quality_checks_return_the_contract_columns() -> None:
         assert gate in code, f"missing check {gate}"
 
 
-def test_incrementality_effects_carry_ci_formulas() -> None:
-    view = read(SQL_DIR / "07_views_dashboard_campaign_incrementality.sql")
-    code, _ = split_comments(view)
-    assert "SQRT(" in code.upper()
-    assert re.search(r"visit_rate \* \(1 - visit_rate\)", code) or "1 - treated.visit_rate" in code
-    assert "1.96" in code, "the 95% multiplier must be visible"
-    assert re.search(r"SQRT\(treated\.spend_variance / treated\.customers", code), "Welch spend SE missing"
-    for column in ["mean_spend_per_customer", "mean_spend_per_visitor", "visit_rate", "conversion_rate"]:
-        assert column in code, f"per-arm metric {column} missing"
+def test_incrementality_uses_the_published_adjusted_evidence() -> None:
+    text = read(SQL_DIR / '07_views_dashboard_campaign_incrementality.sql')
+    assert 'evidence_campaign_incrementality_effects' in text
+    assert 'ci_low_fwer' in text and 'p_holm' in text
+    assert '1.96' not in split_comments(text)[0]
 
 
 def test_uplift_layer_is_aggregate_only_and_defines_scores() -> None:
@@ -228,7 +224,7 @@ def test_uplift_layer_is_aggregate_only_and_defines_scores() -> None:
     assert "cumulative_uplift" in code
     assert "control_scaling_factor" in code
     scores = read(SQL_DIR / "06_uplift_customer_scores_ddl.sql")
-    for column in ["record_id", "comparison", "uplift_score", "propensity_score", "decile", "split"]:
+    for column in ["record_id", "comparison", "uplift_score", "response_score", "decile", "split"]:
         assert re.search(rf"^\s+{column}\s+(INT64|FLOAT64|STRING)\b", scores, re.IGNORECASE | re.MULTILINE)
     assert "PII" in view, "the view must state that per-customer rows stay out of the dashboard"
 
@@ -246,14 +242,21 @@ def test_economics_view_is_modelled_not_realised() -> None:
     assert "not realised roi" in f"{code}\n{comments}".lower()
 
 
-def test_readme_states_the_scripts_were_never_executed() -> None:
-    text = read(README)
-    lowered = text.lower()
-    assert "not executed against a live bigquery project" in lowered
-    assert "never been run" in lowered
-    assert "bq --project_id" in text
-    assert "load --source_format=csv" in lowered
-    assert "mk --dataset" in lowered
-    assert "query --use_legacy_sql=false" in lowered
-    assert "sqlglot" in lowered, "README must say verification is parsing only"
-    assert "sed" in lowered, "README must give the project/dataset substitution step"
+def test_readme_states_deployment_limits() -> None:
+    text = read(README).lower()
+    assert 'not executed against a live bigquery project' in text
+    assert 'deploy_bigquery.py' in text and '--execute' in text
+    assert 'sqlglot' in text
+
+
+def test_no_unsupported_overwrite_or_regenerated_record_ids() -> None:
+    for path in sql_files():
+        code, _ = split_comments(read(path))
+        assert not re.search(r'INSERT\s+OVERWRITE', code, re.I)
+    curated = split_comments(read(SQL_DIR / '03_curated_campaign_customers_insert.sql'))[0]
+    assert 'ROW_NUMBER' not in curated
+    assert 'landing_hillstrom_indexed' in curated
+    economics = split_comments(read(SQL_DIR / '09_views_dashboard_economics.sql'))[0]
+    assert 'treated_targeted_customers AS modelled_emails_sent' in economics
+    assert 'ROUND_HALF_EVEN' in economics
+    assert 'rank_position' in economics
