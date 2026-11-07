@@ -1,0 +1,163 @@
+data:
+  source_name: Hillstrom MineThatData E-Mail Analytics And Data Mining Challenge
+  source_url: "http://www.minethatdata.com/Kevin_Hillstrom_MineThatData_E-MailAnalytics_DataMiningChallenge_2008.03.20.csv"
+  attribution: "Kevin Hillstrom (2008). Randomised e-mail experiment on 64,000 customers of a women's apparel retailer."
+  raw_path: data/raw/hillstrom.csv
+  expected_rows: 64000
+  expected_columns: 12
+  expected_sha256: 0e5893329d8b93cefecc571777672028290ab69865718020c78c7284f291aece
+
+experiment:
+  treatment_column: segment
+  arms:
+    control: "No E-Mail"
+    mens: "Mens E-Mail"
+    womens: "Womens E-Mail"
+  outcomes:
+    primary: conversion
+    secondary:
+      - visit
+      - spend
+  comparisons:
+    - name: mens_vs_control
+      treatment: "Mens E-Mail"
+      control: "No E-Mail"
+      role: primary
+    - name: womens_vs_control
+      treatment: "Womens E-Mail"
+      control: "No E-Mail"
+      role: secondary
+  alpha: 0.05
+  confidence_level: 0.95
+  multiplicity:
+    method: holm
+    # Each outcome is tested twice (both emails vs the same control arm).
+    # Adjustments are applied within an outcome across the two comparisons.
+  bootstrap:
+    replicates: 10000
+    # Holdout slices are far smaller than a full arm, so their intervals use
+    # fewer replicates - enough to stabilise a 2.5% quantile, not more.
+    replicates_small: 2000
+    seed: 20261107
+  srm:
+    # Balanced 1/3 allocation is the design; flag any arm that drifts from it.
+    expected_shares: 0.3333333333
+    min_p_value: 0.001
+  subgroups:
+    # Business question 3 asks which groups look more responsive. Every
+    # variable here is measured before the campaign, so a split cannot be
+    # caused by the treatment. No cut points were invented: these are the
+    # levels the dataset publishes.
+    # The table of per-group effects is exploratory. The honest answer to
+    # "is the effect really different" is the likelihood-ratio interaction
+    # test below, and those tests are Holm-adjusted as one family because
+    # there are six variables times two comparisons.
+    variables:
+      - zip_code
+      - channel
+      - history_segment
+      - newbie
+      - mens
+      - womens
+    outcome: conversion
+
+modelling:
+  # Pre-specified before modelling: the mens merchandise email is the arm the
+  # retailer would scale, so uplift scores are built for mens_vs_control.
+  primary_comparison: mens_vs_control
+  split:
+    train: 0.60
+    validate: 0.20
+    test: 0.20
+    seed: 20261107
+    stratify_on:
+      - segment
+      - conversion
+  features:
+    numeric:
+      - recency
+      - history
+      - newbie
+      - mens
+      - womens
+    categorical:
+      - history_segment
+      - zip_code
+      - channel
+    forbidden:
+      - segment
+      - visit
+      - conversion
+      - spend
+  learners:
+    - propensity
+    - s_learner
+    - t_learner
+  lightgbm:
+    n_estimators: 400
+    learning_rate: 0.05
+    num_leaves: 31
+    min_child_samples: 40
+    subsample: 0.8
+    subsample_freq: 1
+    colsample_bytree: 0.8
+    reg_lambda: 1.0
+  early_stopping_rounds: 50
+  targeting:
+    deciles: 10
+    budget_levels: [0.05, 0.10, 0.20, 0.30, 0.50, 0.75, 1.00]
+
+economics:
+  # The dataset carries no cost or margin data. Everything below is a stated
+  # assumption for scenario analysis, never realised ROI.
+  email_cost_per_send: 0.005
+  gross_margin_rate: 0.45
+  margin_scenarios: [0.30, 0.45, 0.60]
+  cost_scenarios: [0.002, 0.005, 0.010]
+
+mlflow:
+  experiment_name: campaign-incrementality-uplift
+  tracking_uri: sqlite:///mlflow.db
+  run_name_prefix: hillstrom
+
+bigquery:
+  # Warehouse landing load, consumed by scripts/load_bigquery.py.
+  # NOT EXECUTED: this machine has no gcloud, no Docker and no BigQuery access,
+  # and google-cloud-bigquery is not installed (it is deliberately not a
+  # dependency of this repo), so NO dataset, table or load job described here
+  # has ever been created or run against a live project. The script's default
+  # and only verified mode is --dry-run: it prints the job it would submit. The
+  # SQL in sql_dir is parsed and linted by tests/test_sql_bigquery.py; that is a
+  # parser, not an execution. See the warning block in sql/bigquery/README.md.
+  # Identifiers come from the ENV VARS NAMED below - never a value - so no
+  # project id is committed here: export GOOGLE_CLOUD_PROJECT="your-project".
+  project_env_var: GOOGLE_CLOUD_PROJECT
+  dataset_env_var: BIGQUERY_DATASET
+  # Must equal the CREATE SCHEMA target of stage 00.
+  dataset_default: campaign_incrementality
+  # Some regions require --location; set this to your dataset's region.
+  location: US
+  sql_dir: sql/bigquery
+  # The published 12-column CSV lands verbatim into the table stage 00 creates;
+  # data.raw_path is the source file, so it is not repeated here.
+  landing_table: landing_hillstrom_raw
+  landing_schema_sql: sql/bigquery/00_dataset_and_landing_ddl.sql
+  # Its 18-column list is the downstream contract: the load does not write it,
+  # stages 02 and 03 do, and the script checks the two lists still agree.
+  curated_table: curated_campaign_customers
+  curated_schema_sql: sql/bigquery/02_curated_campaign_customers_ddl.sql
+  skip_leading_rows: 1
+  field_delimiter: ","
+  # WRITE_TRUNCATE == `bq load --replace`: the landing table is reloaded whole.
+  write_disposition: WRITE_TRUNCATE
+  # Printed as the next step after a load; this script never executes SQL.
+  stages_after_load:
+    - 01_reference_arms_ddl.sql
+    - 02_curated_campaign_customers_ddl.sql
+    - 03_curated_campaign_customers_insert.sql
+    - 04_data_quality_checks.sql
+    - 05_reference_scenarios_ddl.sql
+    - 06_uplift_customer_scores_ddl.sql
+    - 07_views_dashboard_campaign_incrementality.sql
+    - 08_views_dashboard_uplift.sql
+    - 09_views_dashboard_economics.sql

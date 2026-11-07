@@ -1,0 +1,16 @@
+learner,feature,gain
+s_learner,history,251.68945145606995
+s_learner,recency,195.64584076404572
+propensity,history,120.87614858150482
+t_learner,history,83.29487180709839
+s_learner,treated,72.49749946594238
+s_learner,newbie,69.82839894294739
+s_learner,zip_code_suburban,48.29139029979706
+propensity,recency,45.53945982456207
+t_learner,recency,31.94180452823639
+s_learner,mens,27.734400033950806
+s_learner,channel_phone,27.17930042743683
+s_learner,history_segment_1_0_100,24.781499981880188
+s_learner,history_segment_7_1_000,22.00445008277893
+s_learner,channel_web,17.603279948234558
+s_learner,history_segment_4_350_500,17.346580147743225

@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-11-07T06:59:52+00:00",
+  "source_name": "Hillstrom MineThatData E-Mail Analytics And Data Mining Challenge",
+  "source_url": "http://www.minethatdata.com/Kevin_Hillstrom_MineThatData_E-MailAnalytics_DataMiningChallenge_2008.03.20.csv",
+  "attribution": "Kevin Hillstrom (2008). Randomised e-mail experiment on 64,000 customers of a women's apparel retailer.",
+  "sha256": "0e5893329d8b93cefecc571777672028290ab69865718020c78c7284f291aece",
+  "bytes": 3964977,
+  "rows": 64000,
+  "columns": [
+    "record_id",
+    "recency",
+    "history_segment",
+    "history",
+    "mens",
+    "womens",
+    "zip_code",
+    "newbie",
+    "channel",
+    "segment",
+    "visit",
+    "conversion",
+    "spend",
+    "arm_code",
+    "history_band",
+    "campaign_weeks"
+  ],
+  "arm_counts": {
+    "Mens E-Mail": 21307,
+    "No E-Mail": 21306,
+    "Womens E-Mail": 21387
+  },
+  "runtime": {
+    "python": "3.11.16",
+    "pandas": "3.1.1"
+  }
+}

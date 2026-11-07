@@ -1,0 +1,24 @@
+name,passed,detail,value
+schema.columns,True,12 columns,12
+schema.numeric_dtypes,True,non-numeric numeric columns: [],
+schema.text_dtypes,True,numeric text columns: [],
+completeness.no_nulls,True,columns with nulls: {},0
+completeness.no_blank_labels,True,blank label counts: {},0
+binary.visit,True,"visit values [0, 1]","0, 1"
+binary.conversion,True,"conversion values [0, 1]","0, 1"
+binary.newbie,True,"newbie values [0, 1]","0, 1"
+binary.mens,True,"mens values [0, 1]","0, 1"
+binary.womens,True,"womens values [0, 1]","0, 1"
+volume.row_count,True,64000 rows vs expected 64000,64000
+treatment.labels_exact,True,"observed ['Mens E-Mail', 'No E-Mail', 'Womens E-Mail'] vs expected ['Mens E-Mail', 'No E-Mail', 'Womens E-Mail']","Mens E-Mail, No E-Mail, Womens E-Mail"
+domain.history_segment,True,"history_segment levels ['1) $0 - $100', '2) $100 - $200', '3) $200 - $350', '4) $350 - $500', '5) $500 - $750', '6) $750 - $1,000', '7) $1,000 +']","1) $0 - $100, 2) $100 - $200, 3) $200 - $350, 4) $350 - $500, 5) $500 - $750, 6) $750 - $1,000, 7) $1,000 +"
+domain.zip_code,True,"zip_code levels ['Rural', 'Surburban', 'Urban']","Rural, Surburban, Urban"
+domain.channel,True,"channel levels ['Multichannel', 'Phone', 'Web']","Multichannel, Phone, Web"
+range.numeric_bounds,True,rows outside documented ranges: {},0
+consistency.spend_implies_conversion,True,0 rows spend > 0 without conversion=1,0
+consistency.conversion_implies_visit,True,0 rows converted without visiting,0
+consistency.spend_non_negative,True,min spend 0.0,0.0
+consistency.history_band_matches_segment,True,0 rows where the band label disagrees with history,0
+design.srm_balance,True,"arm counts {'No E-Mail': 21306, 'Mens E-Mail': 21307, 'Womens E-Mail': 21387}; chi-square p=0.9037 vs threshold 0.001",0.903692957551268
+design.arm_share_within_1pct,True,"arm shares {'No E-Mail': 0.33291, 'Mens E-Mail': 0.33292, 'Womens E-Mail': 0.33417}; worst relative deviation 0.2516%",0.0025156251002516478
+leakage.no_post_campaign_features,True,forbidden columns present: [],

@@ -1,0 +1,13 @@
+comparison,chi2,p_value,degrees_of_freedom,n_levels_tested,outcome,subgroup_variable,p_holm,reject_holm,n_tests_in_family,interpretation
+mens_vs_control,1.9165328272038096,0.38355723956495624,2.0,2.0,conversion,zip_code,1.0,False,12,no evidence that the effect differs between these levels
+mens_vs_control,0.45168703357558115,0.7978429409240299,2.0,2.0,conversion,channel,1.0,False,12,no evidence that the effect differs between these levels
+mens_vs_control,3.3628289551379567,0.7621211376435651,6.0,6.0,conversion,history_segment,1.0,False,12,no evidence that the effect differs between these levels
+mens_vs_control,4.90487190220756,0.02678103793763721,1.0,1.0,conversion,newbie,0.29459141731400934,False,12,no evidence that the effect differs between these levels
+mens_vs_control,0.07624428504277603,0.7824530756718208,1.0,1.0,conversion,mens,1.0,False,12,no evidence that the effect differs between these levels
+mens_vs_control,0.12400163628808514,0.7247342759370194,1.0,1.0,conversion,womens,1.0,False,12,no evidence that the effect differs between these levels
+womens_vs_control,0.26134513079978205,0.8775050528721005,2.0,2.0,conversion,zip_code,1.0,False,12,no evidence that the effect differs between these levels
+womens_vs_control,1.6405625797788161,0.4403077829573353,2.0,2.0,conversion,channel,1.0,False,12,no evidence that the effect differs between these levels
+womens_vs_control,13.732706147439785,0.032768752413561655,6.0,6.0,conversion,history_segment,0.31074936278642695,False,12,no evidence that the effect differs between these levels
+womens_vs_control,10.387814265651741,0.0012684969574649771,1.0,1.0,conversion,newbie,0.015221963489579726,True,12,interaction survives multiplicity control
+womens_vs_control,4.183466580826007,0.04082012475808446,1.0,1.0,conversion,mens,0.3265609980646757,False,12,no evidence that the effect differs between these levels
+womens_vs_control,4.6488180965366155,0.031074936278642697,1.0,1.0,conversion,womens,0.31074936278642695,False,12,no evidence that the effect differs between these levels

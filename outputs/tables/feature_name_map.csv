@@ -1,0 +1,19 @@
+source_label,model_column
+recency,recency
+history,history
+newbie,newbie
+mens,mens
+womens,womens
+history_segment_1) $0 - $100,history_segment_1_0_100
+history_segment_2) $100 - $200,history_segment_2_100_200
+history_segment_3) $200 - $350,history_segment_3_200_350
+history_segment_4) $350 - $500,history_segment_4_350_500
+history_segment_5) $500 - $750,history_segment_5_500_750
+"history_segment_6) $750 - $1,000",history_segment_6_750_1_000
+"history_segment_7) $1,000 +",history_segment_7_1_000
+zip_code_Rural,zip_code_rural
+zip_code_Suburban,zip_code_suburban
+zip_code_Urban,zip_code_urban
+channel_Multichannel,channel_multichannel
+channel_Phone,channel_phone
+channel_Web,channel_web

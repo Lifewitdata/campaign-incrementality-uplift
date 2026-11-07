@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "campaign-incrementality-uplift"
+version = "0.1.0"
+description = "Randomised-campaign incrementality and customer uplift modelling on the Hillstrom email marketing experiment"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Isfaque Ansari" }]
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "scipy>=1.11",
+    "statsmodels>=0.14",
+    "scikit-learn>=1.4",
+    "lightgbm>=4.7",
+    "pyyaml>=6.0",
+    "requests>=2.31",
+    "sqlglot>=23.0",
+    "joblib>=1.3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "matplotlib>=3.8"]
+tracking = ["mlflow>=2.11"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "slow: tests that train models or read the full 64k-row dataset",
+]
