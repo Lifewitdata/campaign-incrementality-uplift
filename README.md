@@ -45,6 +45,23 @@ pytest                                     # add -m "not slow" to skip real-data
 Outputs: `outputs/tables/` (evidence CSV/JSON) and `outputs/tableau/` (dashboard extracts, see
 [dashboards/README.md](dashboards/README.md)).
 
+## Complete Python analysis notebook
+
+[Open the end-to-end analysis](notebooks/01_results_walkthrough.ipynb). It works from the
+raw dataset rather than loading published scores: customer EDA, randomization diagnostics,
+bootstrap effects and multiplicity, exploratory interactions, power planning, training-only
+preprocessing, explicit LightGBM propensity/S-/T-learner fits, response diagnostics, holdout
+deciles and Qini curves, paired targeting comparisons, feature importance and scenario economics.
+
+```bash
+python -m pip install -e ".[notebook,tracking]"
+python scripts/ingest_data.py
+```
+
+Select this environment's Python kernel in your notebook editor and run all cells in order.
+The notebook does not overwrite pipeline evidence CSVs. Reusing the historical holdout is a
+reproducibility check, not fresh independent validation.
+
 ## Layout
 
 ```
