@@ -116,14 +116,15 @@ def test_plan_schema_equals_the_landing_ddl_column_list(plan: Any) -> None:
     )
 
 
-def test_bq_cli_equivalent_matches_the_readme_load_step(plan: Any) -> None:
+def test_legacy_bq_cli_equivalent_keeps_raw_only_contract(plan: Any) -> None:
     tokens = lb.bq_cli_command(plan)
     assert tokens[:2] == ["bq", "--project_id=demo-project"]
     assert "--source_format=CSV" in tokens and "--skip_leading_rows=1" in tokens
     assert "--replace" in tokens, "WRITE_TRUNCATE is the SDK spelling of bq's --replace"
     assert plan.destination_table in tokens
     readme = (SQL_DIR / "README.md").read_text(encoding="utf-8")
-    assert ",".join(plan.schema) in readme, "the load schema must be the one the README publishes"
+    assert "legacy raw-only loader" in readme
+    assert ",".join(plan.schema) in tokens
 
 
 def test_dry_run_needs_no_network_and_no_client(config: dict[str, Any], no_cloud_env, monkeypatch, capsys) -> None:
@@ -328,11 +329,11 @@ def test_client_is_imported_lazily_never_at_module_scope() -> None:
 
 
 def test_google_cloud_bigquery_is_not_a_hard_dependency() -> None:
-    pyproject = PYPROJECT.read_text(encoding="utf-8")
-    assert "google-cloud-bigquery" not in pyproject, (
-        "the repo must stay installable offline; the client is an optional extra"
-    )
-    assert "sqlglot" in pyproject, "and the offline dependency set is what these tests use"
+    import tomllib
+    config = tomllib.loads(PYPROJECT.read_text(encoding='utf-8'))['project']
+    assert not any(d.startswith('google-cloud-bigquery') for d in config['dependencies'])
+    assert any(d.startswith('google-cloud-bigquery') for d in config['optional-dependencies']['warehouse'])
+    assert any(d.startswith('sqlglot') for d in config['dependencies'])
 
 
 def test_no_credentials_or_personal_paths_are_committed() -> None:

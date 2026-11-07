@@ -15,15 +15,16 @@
 --          assumed sends x an assumed cost. Incremental revenue and conversions
 --          use the same control-scaled counterfactual as the Qini gain in stage
 --          08, measured inside one split, then scaled to the mailed share; they
---          are not extrapolated to the full customer base. Ranking ties are
---          broken by record_id, which is a load key, not a customer key.
+--          are not extrapolated to the full customer base. Ranking ties use exported
+--          seeded Python ranks. Costs and revenue both
+--          refer to the historical treated subset, not the entire selected list.
 -- NOT EXECUTED: parsed by sqlglot only; never run against a live project.
 -- =============================================================================
 
 CREATE OR REPLACE VIEW `campaign_incrementality.dashboard_targeting_scenario_economics` AS
 WITH scored AS (
   SELECT
-    s.comparison, s.split, s.uplift_score, s.record_id,
+    s.comparison, s.split, s.uplift_score, s.record_id, s.rank_position,
     (c.arm_code = CASE s.comparison WHEN 'mens_vs_control' THEN 'mens'
                                     WHEN 'womens_vs_control' THEN 'womens' END) AS is_treated,
     (c.arm_code = 'control') AS is_control,
@@ -38,8 +39,7 @@ ranked AS (
   SELECT
     comparison, split, is_treated, is_control, conversion, spend,
     COUNT(*) OVER (PARTITION BY comparison, split) AS comparison_pool_customers,
-    CAST(ROW_NUMBER() OVER (PARTITION BY comparison, split ORDER BY uplift_score DESC, record_id) AS FLOAT64)
-      / CAST(COUNT(*) OVER (PARTITION BY comparison, split) AS FLOAT64) AS rank_share
+    rank_position
   FROM scored
   WHERE is_treated OR is_control
 ),
@@ -53,7 +53,7 @@ targeted AS (
     pool.is_treated, pool.is_control, pool.conversion, pool.spend, pool.comparison_pool_customers
   FROM ranked AS pool
   CROSS JOIN budget_levels AS levels
-  WHERE pool.rank_share <= levels.targeting_share
+  WHERE pool.rank_position <= CAST(ROUND(CAST(levels.targeting_share AS NUMERIC) * pool.comparison_pool_customers, 0, 'ROUND_HALF_EVEN') AS INT64)
 ),
 outcomes AS (
   SELECT
@@ -78,7 +78,7 @@ counterfactual AS (
       * SAFE_DIVIDE(treated_targeted_customers, control_targeted_customers) AS modelled_incremental_revenue,
     treated_targeted_conversions - control_targeted_conversions
       * SAFE_DIVIDE(treated_targeted_customers, control_targeted_customers) AS modelled_incremental_conversions,
-    CAST(ROUND(targeting_share * comparison_pool_customers) AS INT64) AS modelled_emails_sent
+    treated_targeted_customers AS modelled_emails_sent
   FROM outcomes
 ),
 scenario_applied AS (

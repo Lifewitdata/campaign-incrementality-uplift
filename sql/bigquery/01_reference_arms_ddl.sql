@@ -12,7 +12,7 @@
 --          pre-campaign purchase behaviour. Arm labels are never people
 --          segments; do not title a chart 'men' or 'women'.
 -- NOT EXECUTED: parsed by sqlglot only; never run against a live project.
---          Idempotent by design: INSERT OVERWRITE replaces the three rows.
+--          Idempotent by design: transactional DELETE/INSERT replaces the three rows.
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS `campaign_incrementality.reference_arms` (
@@ -26,7 +26,9 @@ OPTIONS(
   description = 'Randomised arm dimension for the Hillstrom e-mail experiment. Arm names are product lines, not customer genders.'
 );
 
-INSERT OVERWRITE `campaign_incrementality.reference_arms` (
+BEGIN TRANSACTION;
+DELETE FROM `campaign_incrementality.reference_arms` WHERE TRUE;
+INSERT INTO `campaign_incrementality.reference_arms` (
   arm_code, arm_label, role, arm_rank, description
 )
 SELECT
@@ -41,3 +43,5 @@ UNION ALL
 SELECT
   'womens', 'Womens E-Mail', 'treatment', CAST(3 AS INT64),
   'Treatment: customers sent an e-mail featuring the womens merchandise LINE. The name describes the creative, not the recipient; 21,387 customers.';
+
+COMMIT TRANSACTION;

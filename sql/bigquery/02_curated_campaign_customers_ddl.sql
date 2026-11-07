@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `campaign_incrementality.curated_campaign_customers` 
   arm_code        STRING,    -- control | mens | womens, derived from segment
   history_band    STRING,    -- band re-derived from history; must equal history_segment
   campaign_weeks  INT64,     -- observation window in weeks after the send; constant 2
-  data_loaded_utc TIMESTAMP  -- warehouse-only: when this INSERT OVERWRITE ran
+  data_loaded_utc TIMESTAMP  -- warehouse-only: when this curated refresh ran
 )
 CLUSTER BY arm_code
 OPTIONS(

@@ -26,7 +26,7 @@
 CREATE OR REPLACE VIEW `campaign_incrementality.dashboard_uplift_deciles` AS
 WITH scored AS (
   SELECT
-    s.comparison, s.split, s.decile, s.uplift_score, s.propensity_score,
+    s.comparison, s.split, s.decile, s.uplift_score, s.response_score,
     c.visit, c.conversion, c.spend,
     (c.arm_code = CASE s.comparison WHEN 'mens_vs_control' THEN 'mens'
                                     WHEN 'womens_vs_control' THEN 'womens' END) AS is_treated,
@@ -40,7 +40,7 @@ decile_stats AS (
     comparison, split, decile,
     COUNT(*) AS scored_customers,
     MIN(uplift_score) AS uplift_score_min, MAX(uplift_score) AS uplift_score_max,
-    AVG(uplift_score) AS uplift_score_avg, AVG(propensity_score) AS propensity_score_avg,
+    AVG(uplift_score) AS uplift_score_avg, AVG(response_score) AS response_score_avg,
     SUM(IF(is_treated, 1, 0)) AS treated_customers,
     SUM(IF(is_control, 1, 0)) AS control_customers,
     SUM(IF(is_treated, conversion, 0)) AS treated_conversions,
@@ -56,7 +56,7 @@ decile_stats AS (
 cumulative AS (
   SELECT
     comparison, split, decile, scored_customers, uplift_score_min, uplift_score_max,
-    uplift_score_avg, propensity_score_avg, treated_customers, control_customers,
+    uplift_score_avg, response_score_avg, treated_customers, control_customers,
     treated_conversions, control_conversions, treated_visits, control_visits,
     treated_spend, control_spend,
     SUM(treated_customers) OVER (PARTITION BY comparison, split ORDER BY decile ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cum_treated_customers,
@@ -70,7 +70,7 @@ cumulative AS (
 )
 SELECT
   comparison, split, decile, scored_customers, uplift_score_min, uplift_score_max,
-  uplift_score_avg, propensity_score_avg,
+  uplift_score_avg, response_score_avg,
   treated_customers, control_customers, treated_conversions, control_conversions,
   SAFE_DIVIDE(treated_conversions, treated_customers) AS treated_conversion_rate,
   SAFE_DIVIDE(control_conversions, control_customers) AS control_conversion_rate,
@@ -96,7 +96,7 @@ FROM cumulative;
 -- Headline read for the uplift page: does ranking beat mailing everyone? The
 -- random-targeting benchmark is 10% of the full-population Qini gain (decile 1
 -- is 10% of customers by construction), so qini_vs_random_targeting_ratio
--- above 1 means the score is genuinely sorting on incrementality.
+-- above 1 is descriptive only, not evidence of statistically reliable superiority.
 CREATE OR REPLACE VIEW `campaign_incrementality.dashboard_uplift_summary` AS
 SELECT
   comparison, split,
@@ -110,7 +110,7 @@ SELECT
   SAFE_DIVIDE(MAX(IF(decile = 1, cumulative_qini_gain_conversions, NULL)),
               NULLIF(MAX(IF(decile = 10, cumulative_qini_gain_conversions, NULL)), 0)) AS qini_gain_captured_by_top_decile_share,
   SAFE_DIVIDE(MAX(IF(decile = 1, cumulative_qini_gain_conversions, NULL)),
-              NULLIF(0.1 * MAX(IF(decile = 10, cumulative_qini_gain_conversions, NULL)), 0)) AS qini_vs_random_targeting_ratio,
+              NULLIF(MAX(IF(decile = 1, cumulative_targeted_share, NULL)) * MAX(IF(decile = 10, cumulative_qini_gain_conversions, NULL)), 0)) AS qini_vs_random_targeting_ratio,
   MAX(IF(decile = 1, cumulative_qini_gain_spend, NULL)) AS qini_gain_spend_top_decile,
   MAX(IF(decile = 10, cumulative_qini_gain_spend, NULL)) AS qini_gain_spend_all_customers
 FROM `campaign_incrementality.dashboard_uplift_deciles`

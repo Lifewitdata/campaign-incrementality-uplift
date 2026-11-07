@@ -10,7 +10,7 @@ requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Isfaque Ansari" }]
 dependencies = [
-    "numpy>=1.26",
+    "numpy>=2.0",
     "pandas>=2.1",
     "scipy>=1.11",
     "statsmodels>=0.14",
@@ -23,6 +23,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+warehouse = ["google-cloud-bigquery>=3.20"]
 dev = ["pytest>=7.4", "matplotlib>=3.8"]
 tracking = ["mlflow>=2.11"]
 notebook = ["nbformat>=5.10", "nbclient>=0.10", "ipykernel>=6.29", "matplotlib>=3.8"]

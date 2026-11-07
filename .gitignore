@@ -12,3 +12,5 @@ data/processed/*.csv
 *.zip
 .env
 *.egg-info/
+
+outputs/bigquery/
