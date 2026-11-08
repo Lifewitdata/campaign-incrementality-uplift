@@ -14,3 +14,7 @@ data/processed/*.csv
 *.egg-info/
 
 outputs/bigquery/
+
+.streamlit/secrets.toml
+*.twb
+*.twbx

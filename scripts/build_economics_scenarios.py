@@ -41,8 +41,8 @@ def main() -> None:
         rows.append(frame)
     out = pd.concat(rows, ignore_index=True)
     out.to_csv(PATHS.tables / "economics_scenarios.csv", index=False)
-    tableau = resolve("outputs/tableau")
-    out.to_csv(tableau / "campaign_economics_scenarios.csv", index=False)
+    dashboard = resolve("outputs/dashboard")
+    out.to_csv(dashboard / "campaign_economics_scenarios.csv", index=False)
     base = out[out["is_base_case"] & (out["share_targeted"] == 1.0)]
     print(f"[economics] {len(out)} scenario rows; base case, full list:")
     print(base[["strategy", "scenario_net_value_usd", "scenario_net_value_ci_low_usd",

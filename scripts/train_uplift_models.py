@@ -67,8 +67,8 @@ def main() -> int:
 
     tables = resolve("outputs/tables")
     tables.mkdir(parents=True, exist_ok=True)
-    tableau = resolve("outputs/tableau")
-    tableau.mkdir(parents=True, exist_ok=True)
+    dashboard = resolve("outputs/dashboard")
+    dashboard.mkdir(parents=True, exist_ok=True)
 
     deciles_rows, curves_rows, spread_rows, run_records = [], [], [], []
     for name, entry in models.items():
@@ -194,7 +194,7 @@ def main() -> int:
     head_to_head["uplift_minus_propensity_spend_usd"] = (
         head_to_head["incremental_spend_difference_usd"])
     head_to_head.to_csv(tables / "policy_head_to_head.csv", index=False)
-    head_to_head.to_csv(tableau / "policy_head_to_head.csv", index=False)
+    head_to_head.to_csv(dashboard / "policy_head_to_head.csv", index=False)
     print(f"[paired] t-learner vs propensity at {budgets[0]:.0%} targeted: "
           f"{paired[0]['incremental_conversions_difference']:+.2f} conversions "
           f"[{paired[0]['difference_ci_low']:+.2f}, "
@@ -207,10 +207,10 @@ def main() -> int:
           f"[{paired_t['difference_ci_low']:+.2f}, {paired_t['difference_ci_high']:+.2f}]")
 
     scores.reset_index().to_csv(tables / "holdout_customer_scores.csv", index=False)
-    scores.reset_index().to_csv(tableau / "uplift_customer_scores.csv", index=False)
-    deciles_all.to_csv(tableau / "uplift_deciles.csv", index=False)
-    curves_all.to_csv(tableau / "uplift_curves.csv", index=False)
-    policies.to_csv(tableau / "targeting_policy_values.csv", index=False)
+    scores.reset_index().to_csv(dashboard / "uplift_customer_scores.csv", index=False)
+    deciles_all.to_csv(dashboard / "uplift_deciles.csv", index=False)
+    curves_all.to_csv(dashboard / "uplift_curves.csv", index=False)
+    policies.to_csv(dashboard / "targeting_policy_values.csv", index=False)
 
     importance = feature_importance(models)
     importance.to_csv(tables / "feature_importance.csv", index=False)
@@ -245,7 +245,7 @@ def main() -> int:
               f"{100 * row['top_decile_uplift_conversion']:+.3f} pp, "
               f"bottom-decile {100 * row['bottom_decile_uplift_conversion']:+.3f} pp, "
               f"Qini coefficient {row['holdout_qini_coefficient']:+.2f} conversions")
-    print(f"[exports] {len(deciles_all)} decile rows, {len(policies)} policy rows -> {tableau}")
+    print(f"[exports] {len(deciles_all)} decile rows, {len(policies)} policy rows -> {dashboard}")
     return 0
 
 

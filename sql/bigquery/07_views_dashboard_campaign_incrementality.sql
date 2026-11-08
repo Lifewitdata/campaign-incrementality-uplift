@@ -34,7 +34,7 @@ FROM arm_stats AS stats
 LEFT JOIN `campaign_incrementality.reference_arms` AS arms ON arms.arm_code = stats.arm_code;
 
 -- Use the exact Python effect estimates, adjusted intervals and Holm p-values.
--- This avoids presenting a different confidence convention in Tableau.
+-- This avoids presenting a different confidence convention in Streamlit.
 CREATE OR REPLACE VIEW `campaign_incrementality.dashboard_campaign_incrementality_effects` AS
 SELECT comparison, outcome, measure, effect, effect_type, mean_treatment,
        mean_control, n_treatment, n_control, ci_low_fwer, ci_high_fwer,

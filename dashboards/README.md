@@ -1,10 +1,15 @@
-# Tableau Public dashboards
+# Streamlit decision dashboard
 
-Built by hand in Tableau Public from the CSV extracts in `outputs/tableau/` (regenerate them
-with the pipeline). No workbook is committed until it is published.
+Run `python -m pip install -r requirements.txt`, then
+`python -m streamlit run streamlit_app.py` from the repository root.
 
-| Dashboard | Upload these CSVs | Key views |
-|---|---|---|
-| 1. Campaign Incrementality | `campaign_incrementality_effects.csv`, `campaign_incrementality_arms.csv`, `campaign_incrementality_subgroups.csv`, `campaign_incrementality_heterogeneity.csv` | Effect + family-wise CI by arm and outcome; subgroup forest plot (labelled exploratory) |
-| 2. Customer Uplift & Targeting | `uplift_deciles.csv`, `uplift_curves.csv`, `policy_head_to_head.csv`, `uplift_customer_scores.csv` | Observed uplift by decile; Qini curve vs random line; uplift vs propensity by budget |
-| 3. Campaign Economics & Reliability | `campaign_economics_scenarios.csv`, `targeting_policy_values.csv` | Net-value scenario grid (margin x cost); CI bands. **Title must say "Scenario - not realised ROI".** |
+The four app pages cover campaign impact, uplift targeting, scenario economics,
+and evidence/experiment planning. The app reads `outputs/tables/` using paths
+relative to its own file and needs no cloud credentials or training step.
+
+`outputs/dashboard/` contains reporting exports for the warehouse preparation
+workflow. The dashboard itself uses the primary evidence tables to avoid separate
+copies drifting apart. Filter selections never alter the source data.
+
+The project includes no BI workbooks or external dashboard links. The main README
+contains the local setup and optional Streamlit Community Cloud deployment guide.

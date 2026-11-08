@@ -69,7 +69,7 @@ and row-level data. Keep a copy locally for your portfolio verification.
 | `landing_hillstrom_indexed` | Original 12 fields plus zero-based `record_id`; 64,000 rows |
 | `curated_campaign_customers` | One record per original row, corrected labels and audit fields |
 | `uplift_customer_scores` | One chosen learner per comparison/test split; 8,523 rows for default Mens comparison |
-| `evidence_*` | Exact existing Tableau extracts, preserving all models and Python uncertainty estimates |
+| `evidence_*` | Exact existing Streamlit extracts, preserving all models and Python uncertainty estimates |
 | `dashboard_campaign_incrementality` | Arm-level SQL descriptive metrics |
 | `dashboard_campaign_incrementality_effects` | Python effect estimates, adjusted intervals and Holm p-values |
 | `dashboard_uplift_deciles` / `dashboard_uplift_summary` | Descriptive rollups for the chosen learner |
@@ -86,10 +86,10 @@ statistical superiority; use the paired-bootstrap evidence tables for that quest
 for compatibility. They do **not** feed the supported curated/scoring deployment.
 Do not follow the old raw-only path to build dashboards.
 
-## Tableau handoff
+## Streamlit reporting
 
-After successful live verification, export dashboard results or `evidence_*` tables
-as CSV for Tableau Public. Use evidence tables for all-learner comparisons, bootstrap
-intervals and scenario uncertainty. Do not join tables of different grains into one
-flat table. Workbook building and Tableau Public publication are a separate step;
-this change does not create or publish a dashboard.
+Run `python -m streamlit run streamlit_app.py` from the repository root.
+The app reads the canonical aggregate CSVs in `outputs/tables/`; it does not query
+BigQuery and needs no cloud credentials. `outputs/dashboard/` holds warehouse
+reporting exports. Keep the deployment receipt as separate cloud verification.
+A successful warehouse run does not automatically refresh or host the app.

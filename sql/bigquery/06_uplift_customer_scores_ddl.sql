@@ -17,5 +17,5 @@ CREATE TABLE IF NOT EXISTS `campaign_incrementality.uplift_customer_scores` (
 )
 CLUSTER BY comparison
 OPTIONS(
-  description = 'Per-customer uplift scores for the Hillstrom arms. Row-level scores stay in this table: dashboards read only the aggregate decile rollups, so no per-customer PII or score is shipped to Tableau.'
+  description = 'Per-customer uplift scores for the Hillstrom arms. Row-level scores stay in this table: dashboards read only the aggregate decile rollups, so no per-customer PII or score is shipped to Streamlit.'
 );

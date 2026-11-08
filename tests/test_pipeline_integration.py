@@ -24,7 +24,7 @@ from campaign_ml.validation import prepare_clean_table
 pytestmark = pytest.mark.slow
 
 TABLES = resolve("outputs/tables")
-TABLEAU = resolve("outputs/tableau")
+TABLEAU = resolve("outputs/dashboard")
 
 
 def table(name: str) -> pd.DataFrame:
@@ -328,7 +328,7 @@ def test_reports_quote_figures_that_are_recomputed_not_typed(real, config):
     assert "0.5728" not in report
 
 
-def test_tableau_extracts_are_the_same_numbers_with_their_columns_intact():
+def test_dashboard_extracts_are_the_same_numbers_with_their_columns_intact():
     effects = table("experiment_effects")
     published = pd.read_csv(TABLEAU / "campaign_incrementality_effects.csv")
     assert set(published.columns) == set(effects.columns)

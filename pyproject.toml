@@ -23,6 +23,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+dashboard = ["streamlit>=1.50,<2", "plotly>=5.24,<7"]
 warehouse = ["google-cloud-bigquery>=3.20"]
 dev = ["pytest>=7.4", "matplotlib>=3.8"]
 tracking = ["mlflow>=2.11"]

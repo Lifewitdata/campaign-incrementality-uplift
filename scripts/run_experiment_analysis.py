@@ -3,7 +3,7 @@
     python scripts/run_experiment_analysis.py
 
 Writes the tables behind the Campaign Incrementality dashboard to
-``outputs/tables/`` plus the Tableau-ready extract in ``outputs/tableau/``.
+``outputs/tables/`` plus the Streamlit-ready extract in ``outputs/dashboard/``.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from campaign_ml.experimentation import (
 )
 from campaign_ml.validation import FEATURE_COLUMNS, load_raw, prepare_clean_table
 
-TABLEAU_DIR = "outputs/tableau"
+TABLEAU_DIR = "outputs/dashboard"
 
 COVARIATES = [
     "recency", "history", "history_segment", "zip_code", "newbie", "channel", "mens", "womens",
@@ -39,8 +39,8 @@ def main() -> int:
     df = prepare_clean_table(load_raw(resolve(config["data"]["raw_path"])))
     tables = resolve("outputs/tables")
     tables.mkdir(parents=True, exist_ok=True)
-    tableau = resolve(TABLEAU_DIR)
-    tableau.mkdir(parents=True, exist_ok=True)
+    dashboard = resolve(TABLEAU_DIR)
+    dashboard.mkdir(parents=True, exist_ok=True)
 
     srm = sample_ratio_test(df, expected_share=float(exp["srm"]["expected_shares"]))
     pd.DataFrame([srm]).to_csv(tables / "design_checks.csv", index=False)
@@ -144,11 +144,11 @@ def main() -> int:
 
     key = effects[(effects["measure"] != "relative_lift")
                   & (effects["method"].str.startswith(("Wald", "percentile bootstrap")))]
-    key.to_csv(tableau / "campaign_incrementality_effects.csv", index=False)
-    summary.to_csv(tableau / "campaign_incrementality_arms.csv", index=False)
-    subgroups.to_csv(tableau / "campaign_incrementality_subgroups.csv", index=False)
-    heterogeneity.to_csv(tableau / "campaign_incrementality_heterogeneity.csv", index=False)
-    print(f"[exports] {len(effects)} effect rows, {len(key)} headline rows -> {tableau}")
+    key.to_csv(dashboard / "campaign_incrementality_effects.csv", index=False)
+    summary.to_csv(dashboard / "campaign_incrementality_arms.csv", index=False)
+    subgroups.to_csv(dashboard / "campaign_incrementality_subgroups.csv", index=False)
+    heterogeneity.to_csv(dashboard / "campaign_incrementality_heterogeneity.csv", index=False)
+    print(f"[exports] {len(effects)} effect rows, {len(key)} headline rows -> {dashboard}")
 
     for comparison in exp["comparisons"]:
         for outcome in [exp["outcomes"]["primary"], *exp["outcomes"]["secondary"]]:

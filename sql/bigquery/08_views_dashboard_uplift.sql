@@ -1,5 +1,5 @@
 -- =============================================================================
--- Stage 08 - views_dashboard_uplift (decile rollup Tableau actually reads)
+-- Stage 08 - views_dashboard_uplift (decile rollup Streamlit actually reads)
 -- Purpose: turn per-customer uplift scores into a per-decile treated/control
 --          read: conversion counts and rates, cumulative uplift and a
 --          Qini-style cumulative gain, so a dashboard can show whether ranking

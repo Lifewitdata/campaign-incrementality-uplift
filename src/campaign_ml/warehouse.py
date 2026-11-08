@@ -100,7 +100,7 @@ def prepare_bundle(root: Path, config: dict, learner: str = 't_learner') -> dict
     exports = [write_table(indexed, 'landing_hillstrom_indexed', directory),
                write_table(scores, 'uplift_customer_scores', directory)]
     # Preserve all three learners, uncertainty and policy baselines in evidence tables.
-    for path in sorted((root / 'outputs/tableau').glob('*.csv')):
+    for path in sorted((root / 'outputs/dashboard').glob('*.csv')):
         if path.stem != 'uplift_customer_scores':
             exports.append(write_table(pd.read_csv(path), 'evidence_' + path.stem, directory))
     manifest = {'version': 1, 'executed': False, 'source_sha256': digest(raw_path),
