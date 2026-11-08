@@ -4,6 +4,12 @@
 
 Should a retailer send a campaign to everyone, target customers likely to purchase, or target customers whose purchase probability changes because of the campaign? This project separates those questions using Kevin Hillstrom's randomized email experiment: **64,000 customers**, three campaign arms and two weeks of observed visits, purchases and spending.
 
+## Live dashboard
+
+**[Open the Campaign Decision Lab](https://campaign-incrementality-uplift-jwdemqmdxgwayyxor3qcle.streamlit.app/)**
+
+Explore campaign impact, uplift targeting, campaign economics and experiment-planning evidence in the interactive Streamlit app.
+
 ## Open the dashboard locally
 
 The app runs immediately from the aggregate results included in this repository. No raw-data download, model training, Google Cloud login or API key is required to view it.
@@ -100,7 +106,7 @@ See the [BigQuery runbook](sql/bigquery/README.md). A live run writes `outputs/b
 3. Select branch `main` and entrypoint **`streamlit_app.py`**.
 4. Use Python **3.12**, matching the app validation environment, and deploy.
 
-The root `requirements.txt` installs the minimal app dependencies. No secrets are needed for the included aggregate-data app. A hosted URL should be added only after the actual deployment succeeds; none is claimed here. See [official deployment instructions](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy).
+The root `requirements.txt` installs the minimal app dependencies. No secrets are needed for the included aggregate-data app. The published dashboard is available at [Campaign Decision Lab](https://campaign-incrementality-uplift-jwdemqmdxgwayyxor3qcle.streamlit.app/). See [official deployment instructions](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy).
 
 ## Project layout
 
@@ -123,7 +129,7 @@ Validation for this update: **271 non-slow tests passed**, including four Stream
 
 Run the dashboard tests with `python -m pytest tests/test_streamlit_app.py`. They check page navigation, outcome/segment/model filters, the 64,000 and 8,523 record totals, the paired policy result and scenario arithmetic. Run `python -m pytest -m "not slow"` for the broader fast suite. Full real-data tests require the pinned raw file from ingestion.
 
-This is a completed portfolio analysis and runnable dashboard with a BigQuery deployment path. It is not a scheduled production service. Public app hosting is a separate account-level deployment step. The experiment covers one retailer in 2008 and two-week outcomes; it does not support claims about current campaign profitability, long-term CLV or production targeting gains. No observational matching or difference-in-differences is needed for the randomized treatment comparison.
+This is a completed portfolio analysis and runnable dashboard with a BigQuery deployment path. It is not a scheduled production service. The hosted Streamlit dashboard is linked above; hosting and BigQuery batch execution are separate workflows. The experiment covers one retailer in 2008 and two-week outcomes; it does not support claims about current campaign profitability, long-term CLV or production targeting gains. No observational matching or difference-in-differences is needed for the randomized treatment comparison.
 
 ## Data attribution
 
